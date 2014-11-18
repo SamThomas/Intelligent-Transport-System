@@ -10,7 +10,6 @@ The goal of this project is to provide leading intelligent traffic management in
 ![](http://buildipedia.com/media/k2/items/cache/6ac120fd0b4b143822d7f317faca5711_XL.jpg "")
 
 ### Tcl Scripting language
-
 Tcl (originally from Tool Command Language, but conventionally spelled "Tcl" rather than "TCL"; pronounced as "tickle" or "tee-see-ell") is a scripting language created by John Ousterhout. Originally "born out of frustration", according to the author, with programmers devising their own languages intended to be embedded into applications, Tcl gained acceptance on its own. It is commonly used for rapid prototyping, scripted applications, GUIs and testing. Tcl is used on embedded systems platforms, both in its full form and in several other small-footprint versions.
 The combination of Tcl and the Tk GUI toolkit is referred to as Tcl/Tk.
 
