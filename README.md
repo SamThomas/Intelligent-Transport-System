@@ -6,4 +6,4 @@ Software-based information system that reduce traffic congestion, provide measur
 The goal of this project is to provide leading intelligent traffic management information system, applying advanced technologies to plan, design, integrate, and enable complete solutions that address significant needs in the traffic management market.
 
 
-[picture]: http://technologynewhere.files.wordpress.com/2010/05/highway.gif  "ITS"
+[picture]: http://buildipedia.com/media/k2/items/cache/6ac120fd0b4b143822d7f317faca5711_XL.jpg  "ITS"
