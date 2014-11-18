@@ -1,0 +1,164 @@
+#!/bin/sh
+# the next line restarts using wish \
+exec wish "$0" "$@"
+
+
+#### INITIALISATION DES VARIABLES GLOBALES ###########################
+set var_ident "local"
+set var_message_recu "-"
+set var_message_envoye "-"
+set var_mode_auto false
+set var_fonte_bouton -misc-*-*-r-*-*-14-*-*-*-*-*-*-*
+
+#### DECODAGE DES ARGUMENTS ##########################################
+set var_chaine_args [join $argv]
+set var_liste_args [split $var_chaine_args " "]
+set i 0
+set var_option [lindex $var_liste_args $i]
+while { $var_option != "" } {
+    set var_option_value [split $var_option '=' ]
+    if { [lindex $var_option_value 0] == "--ident" } {
+				set var_ident [lindex $var_option_value 1]
+		}
+		# Ajouter ici d'autres options
+    incr i
+    set var_option [lindex $var_liste_args $i]
+}
+
+#### DEFINITION DES ZONES DE L'INTERFACE #############################
+
+wm title . $var_ident
+
+#### zone pour l'emission
+labelframe .out -pady 2 -padx 2 -text "Message à envoyer"
+entry .out.msg -width 24 -textvariable var_message_envoye
+pack .out.msg -side left -fill y -pady 2
+
+
+#### zone pour la reception
+labelframe .in -pady 2 -padx 2 -text "Message reçu"
+label .in.msg -textvariable var_message_recu -width 32
+pack .in.msg -side left -fill y -pady 2
+
+
+
+#### zone des boutons
+frame .bt
+button .bt.quit -text "Quitter" \
+		-activebackground red \
+		-foreground red \
+		-font $var_fonte_bouton \
+		-width 10 \
+		-command { exit }
+
+button .bt.snd -text "Envoyer" \
+		-activebackground SeaGreen4 \
+		-foreground SeaGreen4 \
+		-font $var_fonte_bouton \
+		-width 10 \
+		-command { proc_emission_message }
+
+button .bt.auto -text "Mode auto" \
+		-activebackground SeaGreen4 \
+		-foreground SeaGreen4 \
+		-font $var_fonte_bouton \
+		-width 8 \
+		-command proc_aut_btdebut
+
+pack  .bt.quit .bt.snd .bt.auto -side right
+
+
+### zone du timer
+labelframe .aut -pady 2 -padx 2 -text "Emission périodique \[état : désactivé\]"
+
+label .aut.lfrq -text "fréquence (ms) :"
+spinbox .aut.sfrq -values "500 800 1000 2000 3000 5000 10000" -width 6 \
+		-textvariable var_aut_frq
+
+pack .aut.lfrq .aut.sfrq -side left -padx 2
+
+
+#### affichage des zones horizontales
+pack .bt .in .out .aut -fill both -expand yes -side top -pady 5
+
+
+
+
+#### LECTURES ASYNCHRONES ############################################
+# lectures asynchrones non bloquantes et appel de la procedure
+# proc_reception_message en cas de reception
+fileevent stdin readable proc_reception_message
+fconfigure stdin -blocking off
+
+
+#### PROCEDURES ######################################################
+# procedure appelee en cas de reception sur l'entree standard
+proc proc_reception_message { } {
+		# recuperation d'une variable de portee globale
+		global var_message_recu
+
+		# Fin d'interruption sur reception
+    		fileevent stdin readable ""
+
+		# Lecture de l'entree standard
+		set var_message_recu [gets stdin]
+
+
+		# Traitement --
+		#  ici : mise a jour de l'affichage
+		#.in.msg configure -text $var_message_recu -width 32 update
+
+		# Reprise des interruptions sur reception
+		fileevent stdin readable proc_reception_message
+}
+
+# procedure appelee en cas de click sur le bouton envoyer
+proc proc_emission_message { } {
+		# recuperation d'une variable de portee globale
+		global var_message_envoye
+
+		# ecriture sur la sortie standard
+		puts stdout $var_message_envoye
+}
+
+# procedure appelee en cas de click sur le bouton auto
+proc proc_aut_btdebut { } {
+		global var_mode_auto .aut
+
+		if { $var_mode_auto } {
+				# passage de "emission en cours" a "aucune emission"
+
+				# arret des emissions programmees
+				after cancel proc_aut_emission
+
+				# remise a l'etat initial des affichages
+				.aut configure -text "Mode automatique \[état : désactivé]"
+				.bt.auto configure -text "Mode auto"
+
+				set var_mode_auto false
+		} else {
+				# passage de "aucune emission" a "emission en cours"
+
+				# mise a jour des affichages
+				.aut configure -text "Mode automatique \[état : activé\]"
+				.bt.auto configure -text "Fin auto"
+
+				set var_mode_auto true
+
+				proc_aut_emission
+		}
+}
+
+# Procedure realisant les emissions automatiques
+proc proc_aut_emission { } {
+		global var_aut_frq
+
+		proc_emission_message
+
+		# programmation de la prochaine emission
+		after $var_aut_frq proc_aut_emission
+						
+}
+
+
+
